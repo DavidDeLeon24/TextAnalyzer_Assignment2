@@ -1,0 +1,38 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-header {
+  background-color: #8B0000;  /* Dark red */
+  padding: 2rem;
+  color: white;
+  background: linear-gradient(135deg, #8B0000 0%, #B22222 100%); /* Red gradient */
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.App-header p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+main {
+  flex: 1;
+  padding: 2rem;
+  background-color: #FFF0F0;  /* Light red tint background */
+}
+
+footer {
+  background-color: #660000;  /* Darker red */
+  color: white;
+  padding: 1rem;
+  margin-top: auto;
+}
