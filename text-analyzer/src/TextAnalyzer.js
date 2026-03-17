@@ -15,15 +15,42 @@ const TextAnalyzer = () => {
         setIsAnalyzed(false); // Hide old results when text changes
     };
 
-    // Counts sentences by splitting on periods
+    // Counts sentences (ends with ., !, or ?)
     const countSentences = (text) => {
-    if (!text.trim()) return 0;
-    
-    // Check if text contains any periods
-    if (!text.includes('.')) return 0;
-    
-    const sentences = text.split('.').filter(s => s.trim() !== '');
-    return sentences.length;
+        if (!text.trim()) return 0;
+        
+        // Replace decimal numbers (444.333) with placeholder so they aren't split
+        let processedText = text.replace(/\d+\.\d+/g, '###DECIMAL###');
+        
+        // Replace URLs with placeholder so they aren't split
+        processedText = processedText.replace(/www\.\S+|https?:\/\/\S+/g, '###URL###');
+        
+        // Find text that ends with . ! or ? followed by space or end of string
+        const sentenceRegex = /[^.!?]+[.!?]+(?:\s|$)/g;
+        const matches = processedText.match(sentenceRegex) || [];
+        
+        // Filter out invalid sentences
+        const validSentences = matches.filter(sentence => {
+            const trimmed = sentence.trim();
+            if (trimmed.length < 2) return false; // Too short
+            
+            // Remove the ending punctuation
+            const textWithoutPunctuation = trimmed.slice(0, -1).trim();
+            
+            // Must have at least one letter
+            const hasLetter = /[a-zA-Z]/.test(textWithoutPunctuation);
+            
+            // Check if it's a single letter (like "a" or "b")
+            const isSingleLetter = /^[a-zA-Z]$/.test(textWithoutPunctuation);
+            
+            // Check if it's ONLY numbers/symbols with NO letters (like "1+2.")
+            const isOnlyMath = /^[0-9\s+\-*/=]+$/.test(textWithoutPunctuation) && !hasLetter;
+            
+            // Keep only valid sentences
+            return hasLetter && !isSingleLetter && !isOnlyMath;
+        });
+        
+        return validSentences.length;
     };
 
     // Counts how many times each word appears
@@ -31,7 +58,7 @@ const TextAnalyzer = () => {
         if (!text.trim()) return {};
         
         // Convert to lowercase and remove punctuation
-        const cleanText = text.toLowerCase().replace(/[^\w\s]/g, '');
+        const cleanText = text.toLowerCase().replace(/[^\w\s']|_/g, ' ').replace(/\s+/g, ' ');
         // Split into words
         const words = cleanText.split(/\s+/).filter(word => word.length > 0);
         
@@ -46,7 +73,7 @@ const TextAnalyzer = () => {
 
     // Handles form submission
     const handleSubmit = (e) => {
-        e.preventDefault(); // Prevent page refresh
+        e.preventDefault(); // Stop page from refreshing
         
         // Check if text is empty
         if (!inputText.trim()) {
@@ -54,7 +81,7 @@ const TextAnalyzer = () => {
             return;
         }
 
-        // Perform analysis
+        // Run analysis
         const sentenceCount = countSentences(inputText);
         const wordFrequency = calculateWordFrequency(inputText);
         
@@ -71,7 +98,7 @@ const TextAnalyzer = () => {
     const handleReset = () => {
         setInputText('');        // Clear textarea
         setAnalysisResult(null);  // Clear results
-        setIsAnalyzed(false);     // Hide results section
+        setIsAnalyzed(false);     // Hide results
     };
 
     return (
@@ -86,7 +113,7 @@ const TextAnalyzer = () => {
                                 <textarea
                                     value={inputText}
                                     onChange={handleTextChange}
-                                    placeholder="Type or paste your text here... (Sentences should end with a period.)"
+                                    placeholder="Type or paste your text here... (Sentences end with ., !, or ?)"
                                     rows="12"
                                     className="text-input"
                                 />
@@ -130,7 +157,7 @@ const TextAnalyzer = () => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {/* Sort words by frequency (highest first) and display */}
+                                                {/* Show words from most to least frequent */}
                                                 {Object.entries(analysisResult.wordFrequency)
                                                     .sort((a, b) => b[1] - a[1])
                                                     .map(([word, count], index) => (
@@ -148,7 +175,7 @@ const TextAnalyzer = () => {
                             </div>
                         </div>
                     ) : (
-                        /* Placeholder shown when no analysis has been done */
+                        /* Show this when no analysis yet */
                         <div className="results-placeholder">
                             <p>Enter text on the left and click "Analyze Text" to see results here</p>
                         </div>
