@@ -205,7 +205,7 @@
     font-weight: 700;
 }
 
-/* Alternating row colors for better readability */
+/* Alternating row colors */
 .frequency-table tr:nth-child(even) {
     background-color: #FFF0F0;
 }
