@@ -19,7 +19,7 @@
     align-self: flex-start;
 }
 
-/* Right side - results area */
+/* Result Area*/
 .right-side {
     flex: 1.3;
 }
