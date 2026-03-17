@@ -5,7 +5,7 @@
     padding: 20px;
 }
 
-/* Split layout - puts input and results side by side */
+/* Split layout */
 .split-layout {
     display: flex;
     gap: 40px;
